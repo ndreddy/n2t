@@ -1,0 +1,44 @@
+
+/** 
+ * Multiplexor:
+ * out = a if sel == 0
+ *       b otherwise
+ * From truth table out = 1 if
+ * ( a And Not(b)) And Not(s) ) Or
+ * ( a And b ) And S ) Or
+ * ( a And b ) And Not(S) ) Or
+ * ( Not(a) And b) And s) Or
+ *
+ */
+
+CHIP Mux {
+    IN a, b, sel;
+    OUT out;
+
+    PARTS:
+    Not(in=a, out=nota);
+    Not(in=b, out=notb);
+    Not(in=sel, out=nots);
+
+    // First column
+    And(a=a, b=notb, out=aAndNotb); //Top path
+    And(a=a, b=b, out=aAndb);       // Middle Path
+    And(a=nota, b=b, out=notaAndb); // Bottom path
+
+    // Second column ---------------
+
+    // Top path
+    And(a=aAndNotb, b=nots, out=aAndNotbAndNots);
+
+    // Middle path
+    And(a=aAndb, b=sel, out=aAndbAnds);
+    And(a=aAndb, b=nots, out=aAndbAndNots);
+
+    // Bottom path
+    And(a=notaAndb, b=sel, out=notaAndbAnds);
+
+    Or(a=aAndbAnds, b=aAndbAndNots, out=aAndbAndsOraAndbAndNots);
+    Or(a=aAndNotbAndNots, b=notaAndbAnds, out=aAndNotbAndNotsOrnotaAndbAnds);
+    Or(a=aAndbAndsOraAndbAndNots, b=aAndNotbAndNotsOrnotaAndbAnds, out=out);
+
+}
